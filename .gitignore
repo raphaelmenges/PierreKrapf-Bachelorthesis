@@ -1,2 +1,4 @@
 data
 net.ipynb
+*/**/data.csv
+*/**/__pycache__
