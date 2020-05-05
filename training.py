@@ -4,7 +4,7 @@ import datetime
 import torch
 import torch.optim as optim
 import torch.nn.functional as F
-from tqdm import tqdm
+# from tqdm import tqdm
 from torchvision import transforms, datasets
 from net import Net
 from itertools import takewhile
@@ -53,8 +53,11 @@ class Training():
         for epoch in range(epochs):
             print(f"Epoch: {epoch}:")
             running_loss = 0.0
-            for i, data in enumerate(tqdm(self.trainloader)):
+            for i, data in enumerate(self.trainloader):
                 X, y = data
+                if self.device == "cuda":
+                    X = X.cuda()
+                    y = y.cuda()
                 self.optimizer.zero_grad()
                 output = self.net(X)
                 loss = F.cross_entropy(output, y)
