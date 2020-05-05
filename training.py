@@ -51,7 +51,7 @@ class Training():
         print("Starting training!")
         self.net.train()
         for epoch in range(epochs):
-            print(f"Epoch: {epoch+1}:")
+            print(f"Epoch {epoch+1} of {epochs}:")
             running_loss = 0.0
             for i, data in enumerate(self.trainloader):
                 X, y = data
