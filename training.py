@@ -61,6 +61,7 @@ class Training():
                 self.optimizer.zero_grad()
                 output = self.net(X)
                 loss = F.cross_entropy(output, y)
+                loss.backward()
                 self.optimizer.step()
                 running_loss += loss.item()
                 if i % 2000 == 1999:
