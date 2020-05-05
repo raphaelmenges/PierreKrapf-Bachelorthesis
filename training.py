@@ -86,7 +86,8 @@ class Training():
             self.sp_serial, target_file = ser_files[-1]
 
         print(f"Loading progress from {target_file}!")
-        self.net.load_state_dict(torch.load(target_file))
+        self.net.load_state_dict(torch.load(
+            os.path.join(self.savepoint_dir, target_file)))
         self.net.eval()
 
     def _makeSavepoint(self):
