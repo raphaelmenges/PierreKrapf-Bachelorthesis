@@ -14,7 +14,7 @@ from training import Training
 
 def run():
     tr = Training()
-    tr.run()
+    tr.run(epochs=10)
 
 
 def main():

@@ -51,7 +51,7 @@ class Training():
         print("Starting training!")
         self.net.train()
         for epoch in range(epochs):
-            print(f"Epoch: {epoch}:")
+            print(f"Epoch: {epoch+1}:")
             running_loss = 0.0
             for i, data in enumerate(self.trainloader):
                 X, y = data
@@ -92,9 +92,10 @@ class Training():
     def _makeSavepoint(self):
         if not os.path.isdir(self.savepoint_dir):
             os.mkdir(self.savepoint_dir)
-        fn = self._getNextSavepointPath()
-        print(f"Saving progress in {fn}!")
-        torch.save(self.net.state_dict(), fn)
+        target_path = os.path.join(
+            self.savepoint_dir, self._getNextSavepointPath())
+        print(f"Saving progress in {target_path}!")
+        torch.save(self.net.state_dict(), target_path)
 
     def _getSavepointList(self):
         # only look @ .pt and .pth files
