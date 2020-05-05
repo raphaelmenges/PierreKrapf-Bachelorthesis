@@ -2,3 +2,6 @@ data
 net.ipynb
 */**/data.csv
 */**/__pycache__
+__pycache__
+todo.md
+.prettierignore

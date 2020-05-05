@@ -1,6 +1,7 @@
 from helper import isPng, filenameToLabel
 from torch.utils.data.dataset import Dataset
 import torch
+import torch.nn.functional as F
 import os
 import csv
 import re
@@ -11,6 +12,13 @@ import matplotlib.pyplot as plt
 from torchvision import transforms
 from tqdm import tqdm
 import random
+
+
+def find(arr, el):
+    for i, e in enumerate(arr):
+        if e == el:
+            return i
+    return None
 
 
 class SimpleDataset(Dataset):
@@ -30,7 +38,9 @@ class SimpleDataset(Dataset):
         self.data_info = df if self.classes == None else df[df.label.isin(
             self.classes)]
         self.image_arr = np.asarray(self.data_info.iloc[:, 1])
-        self.label_arr = np.asarray(self.data_info.iloc[:, 2])
+        self.label_arr = self.data_info.iloc[:, 2]
+        if not self.classes:
+            self.classes = np.unique(self.label_arr)
         self.data_len = len(self.data_info.nr)
 
     def __len__(self):
@@ -41,7 +51,8 @@ class SimpleDataset(Dataset):
         label = self.label_arr[index]
         img = Image.open(os.path.join(self.root_dir, image_name))
         img_tensor = self.transform(img)
-        return (img_tensor, label)
+        i = find(self.classes, label)
+        return (img_tensor, i)
 
     def genCSV(self):
         print("Generating csv")
