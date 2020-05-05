@@ -13,7 +13,8 @@ from training import Training
 
 
 def run():
-    tr = Training(savepoint_dir=os.path.join("drive", "savepoints"))
+    tr = Training(savepoint_dir=os.path.join(
+        "drive", "My Drive", "savepoints"))
     tr.run(epochs=10)
 
 

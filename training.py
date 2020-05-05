@@ -38,38 +38,39 @@ class Training():
         # TODO: Use actual dataset
         # Using CIFAR10 to test
         self.trainset = datasets.CIFAR10(
-            os.path.join("drive", "data"), train=True, download=True, transform=self.transforms)
+            os.path.join("drive", "My Drive", "data"), train=True, download=True, transform=self.transforms)
         self.trainloader = torch.utils.data.DataLoader(
             self.trainset, batch_size=4, shuffle=True, num_workers=2)
 
         self.testset = datasets.CIFAR10(
-            os.path.join("drive", "data"), train=False, download=True, transform=self.transforms)
+            os.path.join("drive", "My Drive", "data"), train=False, download=True, transform=self.transforms)
         self.testloader = torch.utils.data.DataLoader(
             self.trainset, batch_size=4, shuffle=False, num_workers=2)
 
     def run(self, epochs=1):
-        print("Starting training!")
-        self.net.train()
-        for epoch in range(epochs):
-            print(f"Epoch {epoch+1} of {epochs}:")
-            running_loss = 0.0
-            for i, data in enumerate(self.trainloader):
-                X, y = data
-                if self.device == "cuda":
-                    X = X.cuda()
-                    y = y.cuda()
-                self.optimizer.zero_grad()
-                output = self.net(X)
-                loss = F.cross_entropy(output, y)
-                loss.backward()
-                self.optimizer.step()
-                running_loss += loss.item()
-                if i % 2000 == 1999:
-                    print('[%d, %5d] loss: %.3f' %
-                          (epoch + 1, i + 1, running_loss / 2000))
-                    running_loss = 0.0
-            self._makeSavepoint()
-        print("Finished training!")
+        while True:
+            print("Starting training!")
+            self.net.train()
+            for epoch in range(epochs):
+                print(f"Epoch {epoch+1} of {epochs}:")
+                running_loss = 0.0
+                for i, data in enumerate(self.trainloader):
+                    X, y = data
+                    if self.device == "cuda":
+                        X = X.cuda()
+                        y = y.cuda()
+                    self.optimizer.zero_grad()
+                    output = self.net(X)
+                    loss = F.cross_entropy(output, y)
+                    loss.backward()
+                    self.optimizer.step()
+                    running_loss += loss.item()
+                    if i % 2000 == 1999:
+                        print('[%d, %5d] loss: %.3f' %
+                              (epoch + 1, i + 1, running_loss / 2000))
+                        running_loss = 0.0
+                self._makeSavepoint()
+            print("Finished training!")
 
     def _loadSavepoint(self, savepoints):
         if not os.path.isdir(self.savepoint_dir):
