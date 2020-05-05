@@ -38,12 +38,12 @@ class Training():
         # TODO: Use actual dataset
         # Using CIFAR10 to test
         self.trainset = datasets.CIFAR10(
-            "./data", train=True, download=True, transform=self.transforms)
+            os.path.join("drive", "data"), train=True, download=True, transform=self.transforms)
         self.trainloader = torch.utils.data.DataLoader(
             self.trainset, batch_size=4, shuffle=True, num_workers=2)
 
         self.testset = datasets.CIFAR10(
-            "./data", train=False, download=True, transform=self.transforms)
+            os.path.join("drive", "data"), train=False, download=True, transform=self.transforms)
         self.testloader = torch.utils.data.DataLoader(
             self.trainset, batch_size=4, shuffle=False, num_workers=2)
 
