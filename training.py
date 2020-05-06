@@ -8,8 +8,12 @@ import torch.nn.functional as F
 from torchvision import transforms, datasets
 from net import Net
 from itertools import takewhile
+import matplotlib.pyplot as plt
 
 MAX_SAVEPOINTS = 10
+CLASSES = ('plane', 'car', 'bird', 'cat',
+           'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
+PRINT_AFTER_X_BATCHES = 500
 
 
 class Training():
@@ -73,15 +77,22 @@ class Training():
                     if self.device == "cuda":
                         inputs = inputs.cuda()
                         labels = labels.cuda()
+                    # Show first image for testing transforms
+                    # for index, i in enumerate(inputs):
+                    #     img = i.numpy()[0]
+                    #     plt.imshow(img, cmap="gray")
+                    #     plt.title(CLASSES[labels[index]])
+                    #     plt.show()
+                    # exit()
                     self.optimizer.zero_grad()
                     outputs = self.net(inputs)
                     loss = self.loss(outputs, labels)
                     loss.backward()
                     self.optimizer.step()
                     running_loss += loss.item()
-                    if i % 2000 == 1999:
+                    if i % PRINT_AFTER_X_BATCHES == PRINT_AFTER_X_BATCHES-1:
                         print('[%d, %5d] loss: %.3f' %
-                              (epoch + 1, i + 1, running_loss / 2000))
+                              (epoch + 1, i + 1, running_loss / PRINT_AFTER_X_BATCHES))
                         running_loss = 0.0
                 self._makeSavepoint()
             print("Finished training!")
