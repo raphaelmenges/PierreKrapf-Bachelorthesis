@@ -13,7 +13,9 @@ MAX_SAVEPOINTS = 10
 
 
 class Training():
-    def __init__(self, lr=0.01, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False):
+    def __init__(self, lr=0.01, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2):
+        self.batch_size = batch_size
+        self.num_workers = num_workers
         self.sp_serial = sp_serial
         self.savepoint_dir = savepoint_dir
         self.net = Net()
@@ -51,12 +53,12 @@ class Training():
         self.trainset = datasets.CIFAR10(
             os.path.join("drive", "My Drive", "data"), train=True, download=True, transform=self.transforms)
         self.trainloader = torch.utils.data.DataLoader(
-            self.trainset, batch_size=4, shuffle=True, num_workers=2)
+            self.trainset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
 
         self.testset = datasets.CIFAR10(
             os.path.join("drive", "My Drive", "data"), train=False, download=True, transform=self.transforms)
         self.testloader = torch.utils.data.DataLoader(
-            self.trainset, batch_size=4, shuffle=False, num_workers=2)
+            self.trainset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
     def run(self, epochs=1):
         # TODO: Save and load epochs from savepoint
@@ -72,8 +74,8 @@ class Training():
                         inputs = inputs.cuda()
                         labels = labels.cuda()
                     self.optimizer.zero_grad()
-                    output = self.net(inputs)
-                    loss = self.loss(output, labels)
+                    outputs = self.net(inputs)
+                    loss = self.loss(outputs, labels)
                     loss.backward()
                     self.optimizer.step()
                     running_loss += loss.item()
@@ -83,7 +85,7 @@ class Training():
                         running_loss = 0.0
                 self._makeSavepoint()
             print("Finished training!")
-        # TODO: Better evaluation
+            self.evaluate()
 
     def _loadSavepoint(self, savepoints):
         if not os.path.isdir(self.savepoint_dir):
@@ -146,3 +148,18 @@ class Training():
             print(
                 f"Removing old savepoint: {os.path.abspath(files[0])} - {success}")
             files = files[1:]
+
+    def evaluate(self):
+        self.net.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data in self.testloader:
+                images, labels = data
+                outputs = self.net(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        print("Accuracy of the network on %d test images: %d %%" %
+              (100 * correct / total))
