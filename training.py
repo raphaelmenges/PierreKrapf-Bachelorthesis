@@ -130,19 +130,19 @@ class Training():
 
     def _getNextSavepointPath(self):
         sn = self.sp_serial + 1
-        fn = f"{sn}_savepoint.pth"
+        fn = "%03d_savepoint.pth" % sn
         current_files = os.listdir(self.savepoint_dir)
         while fn in current_files:
             sn = sn + 1
-            fn = f"{sn}_savepoint.pth"
+            fn = "%03d_savepoint.pth" % sn
         self.sp_serial = sn
         return fn
 
     def _removeOldSavepoints(self):
         files = self._getSavepointList()
-        # files :: [(sn :: Int, path :: String)]
+        # files :: [(sn :: Int, path :: String)] sorted
         while len(files) > MAX_SAVEPOINTS:
-            t = files[0]
+            t = files[0][1]
             os.remove(t)
             success = "Success" if os.path.isfile(t) else "Failed"
             print(
