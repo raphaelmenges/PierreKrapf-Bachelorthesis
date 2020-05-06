@@ -143,7 +143,7 @@ class Training():
         # files :: [(sn :: Int, path :: String)] sorted
         while len(files) > MAX_SAVEPOINTS:
             t = files[0][1]
-            os.remove(t)
+            os.remove(os.path.join(self.savepoint_dir, t))
             success = "Success" if os.path.isfile(t) else "Failed"
             print(
                 f"Removing old savepoint: {os.path.abspath(files[0])} - {success}")
