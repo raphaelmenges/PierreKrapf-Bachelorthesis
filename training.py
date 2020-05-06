@@ -117,6 +117,7 @@ class Training():
         fn = f"{sn}_savepoint.pth"
         current_files = os.listdir(self.savepoint_dir)
         while fn in current_files:
-            sn = self.sp_serial + 1
+            sn = sn + 1
             fn = f"{sn}_savepoint.pth"
+        self.sp_serial = sn
         return fn
