@@ -13,11 +13,11 @@ import matplotlib.pyplot as plt
 MAX_SAVEPOINTS = 10
 CLASSES = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-PRINT_AFTER_X_BATCHES = 50
+PRINT_AFTER_X_BATCHES = 10
 
 
 class Training():
-    def __init__(self, lr=0.01, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2):
+    def __init__(self, lr=0.1, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.sp_serial = sp_serial
@@ -36,7 +36,7 @@ class Training():
         # Define optimizer AFTER device is set
         self.optimizer = optim.RMSprop(
             self.net.parameters(), lr=lr, momentum=momentum)
-        self.loss = torch.nn.CrossEntropyLoss()
+        self.criterion = torch.nn.CrossEntropyLoss()
 
         self.transforms = transforms.Compose([
             transforms.Grayscale(1),
@@ -84,9 +84,9 @@ class Training():
                     #     plt.title(CLASSES[labels[index]])
                     #     plt.show()
                     # exit()
-                    self.optimizer.zero_grad()
                     outputs = self.net(inputs)
-                    loss = self.loss(outputs, labels)
+                    loss = self.criterion(outputs, labels)
+                    self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
                     running_loss += loss.item()
