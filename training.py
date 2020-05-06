@@ -144,9 +144,8 @@ class Training():
         while len(files) > MAX_SAVEPOINTS:
             t = files[0][1]
             os.remove(os.path.join(self.savepoint_dir, t))
-            success = "Success" if os.path.isfile(t) else "Failed"
             print(
-                f"Removing old savepoint: {os.path.abspath(t)} - {success}")
+                f"Removing old savepoint: {t}")
             files = files[1:]
 
     def evaluate(self):
