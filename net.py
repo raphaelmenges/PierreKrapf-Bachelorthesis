@@ -4,7 +4,7 @@ from functools import reduce
 
 
 class Net(nn.Module):
-    def __init__(self):
+    def __init__(self, classes):
         super().__init__()
 
         # Stack 1
@@ -63,7 +63,7 @@ class Net(nn.Module):
 
         # Fully connected
         self.dense1 = nn.Linear(1152, 512)
-        self.dense2 = nn.Linear(512, 99)
+        self.dense2 = nn.Linear(512, classes)
 
         # Max-Pool
         self.pool = nn.MaxPool2d(2, 2)

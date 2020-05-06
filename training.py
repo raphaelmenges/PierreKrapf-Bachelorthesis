@@ -22,7 +22,7 @@ class Training():
         self.num_workers = num_workers
         self.sp_serial = sp_serial
         self.savepoint_dir = savepoint_dir
-        self.net = Net()
+        self.net = Net(classes=len(CLASSES))
         if (not no_cuda) and torch.cuda.is_available():
             self.net.cuda()
             self.device = "cuda"
