@@ -13,7 +13,7 @@ import matplotlib.pyplot as plt
 MAX_SAVEPOINTS = 10
 CLASSES = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-PRINT_AFTER_X_BATCHES = 500
+PRINT_AFTER_X_BATCHES = 50
 
 
 class Training():
