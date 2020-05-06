@@ -146,7 +146,7 @@ class Training():
             os.remove(os.path.join(self.savepoint_dir, t))
             success = "Success" if os.path.isfile(t) else "Failed"
             print(
-                f"Removing old savepoint: {os.path.abspath(files[0])} - {success}")
+                f"Removing old savepoint: {os.path.abspath(t)} - {success}")
             files = files[1:]
 
     def evaluate(self):
