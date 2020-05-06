@@ -9,18 +9,29 @@ from torchvision import transforms, datasets
 from net import Net
 from itertools import takewhile
 
+MAX_SAVEPOINTS = 10
+
 
 class Training():
-    def __init__(self, lr=0.1, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1):
+    def __init__(self, lr=0.01, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False):
         self.sp_serial = sp_serial
         self.savepoint_dir = savepoint_dir
         self.net = Net()
-        self.device = "cuda" if torch.cuda.is_available() else 'cpu'
-        self.net.to(self.device)
-        print(f"Device :: {self.device}")
+        if (not no_cuda) and torch.cuda.is_available():
+            self.net.cuda()
+            self.device = "cuda"
+            print(f"Device :: CUDA {torch.cuda.get_device_name()}")
+        else:
+            self.device = "cpu"
+            print(f"Device :: CPU")
+
         # TODO: dynamic learning rate
+
+        # Define optimizer AFTER device is set
         self.optimizer = optim.RMSprop(
             self.net.parameters(), lr=lr, momentum=momentum)
+        self.loss = torch.nn.CrossEntropyLoss()
+
         self.transforms = transforms.Compose([
             transforms.Grayscale(1),
             transforms.RandomAffine(0, translate=(.1, .1)),
@@ -48,6 +59,7 @@ class Training():
             self.trainset, batch_size=4, shuffle=False, num_workers=2)
 
     def run(self, epochs=1):
+        # TODO: Save and load epochs from savepoint
         while True:
             print("Starting training!")
             self.net.train()
@@ -55,13 +67,13 @@ class Training():
                 print(f"Epoch {epoch+1} of {epochs}:")
                 running_loss = 0.0
                 for i, data in enumerate(self.trainloader):
-                    X, y = data
+                    inputs, labels = data
                     if self.device == "cuda":
-                        X = X.cuda()
-                        y = y.cuda()
+                        inputs = inputs.cuda()
+                        labels = labels.cuda()
                     self.optimizer.zero_grad()
-                    output = self.net(X)
-                    loss = F.cross_entropy(output, y)
+                    output = self.net(inputs)
+                    loss = self.loss(output, labels)
                     loss.backward()
                     self.optimizer.step()
                     running_loss += loss.item()
@@ -71,6 +83,7 @@ class Training():
                         running_loss = 0.0
                 self._makeSavepoint()
             print("Finished training!")
+        # TODO: Better evaluation
 
     def _loadSavepoint(self, savepoints):
         if not os.path.isdir(self.savepoint_dir):
@@ -100,6 +113,7 @@ class Training():
             self.savepoint_dir, self._getNextSavepointPath())
         print(f"Saving progress in {target_path}!")
         torch.save(self.net.state_dict(), target_path)
+        self._removeOldSavepoints()
 
     def _getSavepointList(self):
         # only look @ .pt and .pth files
@@ -121,3 +135,14 @@ class Training():
             fn = f"{sn}_savepoint.pth"
         self.sp_serial = sn
         return fn
+
+    def _removeOldSavepoints(self):
+        files = self._getSavepointList()
+        # files :: [(sn :: Int, path :: String)]
+        while len(files) > MAX_SAVEPOINTS:
+            t = files[0]
+            os.remove(t)
+            success = "Success" if os.path.isfile(t) else "Failed"
+            print(
+                f"Removing old savepoint: {os.path.abspath(files[0])} - {success}")
+            files = files[1:]
