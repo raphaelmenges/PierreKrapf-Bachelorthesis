@@ -1,3 +1,4 @@
+import math
 import torch.nn as nn
 import torch.nn.functional as F
 from functools import reduce
@@ -105,6 +106,8 @@ class Net(nn.Module):
 
         x = x.view(x.size()[0], -1)
         x = F.elu(self.dense1(x))
-        x = F.softmax(self.dense2(x), dim=-1)
+        x = self.dense2(x)
+        print(x)
+        # x = F.softmax(x, dim=0)
 
         return x

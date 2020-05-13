@@ -1,3 +1,4 @@
+import math
 import numpy as np
 import os
 import datetime
@@ -13,7 +14,7 @@ import matplotlib.pyplot as plt
 MAX_SAVEPOINTS = 10
 CLASSES = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-PRINT_AFTER_X_BATCHES = 10
+PRINT_AFTER_X_BATCHES = 100
 
 
 class Training():
@@ -69,14 +70,17 @@ class Training():
         while True:
             print("Starting training!")
             self.net.train()
+            # for each epoch
             for epoch in range(epochs):
                 print(f"Epoch {epoch+1} of {epochs}:")
                 running_loss = 0.0
+
+                # for each batch
                 for i, data in enumerate(self.trainloader):
-                    inputs, labels = data
+                    inputs, targets = data
                     if self.device == "cuda":
                         inputs = inputs.cuda()
-                        labels = labels.cuda()
+                        targets = targets.cuda()
                     # Show first image for testing transforms
                     # for index, i in enumerate(inputs):
                     #     img = i.numpy()[0]
@@ -84,11 +88,23 @@ class Training():
                     #     plt.title(CLASSES[labels[index]])
                     #     plt.show()
                     # exit()
+
+                    # run batch through net and calculate loss
                     outputs = self.net(inputs)
-                    loss = self.criterion(outputs, labels)
+                    loss = self.criterion(outputs, targets)
+
+                    # if math.isnan(loss.item()):
+                    #     print(loss)
+                    #     print(outputs)
+                    # Backpropagation
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
+
+                    # if math.isnan(loss.item()):
+                    #     print(loss)
+                    #     print(outputs)
+                    #     exit()
                     running_loss += loss.item()
                     if i % PRINT_AFTER_X_BATCHES == PRINT_AFTER_X_BATCHES-1:
                         print('[%d, %5d] loss: %.3f' %
