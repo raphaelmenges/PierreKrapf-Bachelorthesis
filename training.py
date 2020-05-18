@@ -14,11 +14,11 @@ import matplotlib.pyplot as plt
 MAX_SAVEPOINTS = 10
 CLASSES = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-PRINT_AFTER_X_BATCHES = 100
+PRINT_AFTER_X_BATCHES = 1
 
 
 class Training():
-    def __init__(self, lr=0.01, momentum=0.7, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2, weight_decay=0.1):
+    def __init__(self, lr=0.00001, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2, weight_decay=0.0005):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.sp_serial = sp_serial
@@ -80,6 +80,7 @@ class Training():
                 # for each batch
                 for i, data in enumerate(self.trainloader):
                     inputs, targets = data
+
                     if self.device == "cuda":
                         inputs = inputs.cuda()
                         targets = targets.cuda()
@@ -97,8 +98,10 @@ class Training():
 
                     if math.isnan(loss.item()):
                         print(" ############# Loss is NaN #############")
-                        print("Outputs: " + outputs)
-                        print("Loss: " + loss)
+                        print("Outputs: ")
+                        print(outputs)
+                        print("Loss: ")
+                        print(loss)
                         exit(-1)
 
                     # Backpropagation
