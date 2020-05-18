@@ -18,7 +18,7 @@ PRINT_AFTER_X_BATCHES = 100
 
 
 class Training():
-    def __init__(self, lr=0.1, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2):
+    def __init__(self, lr=0.01, momentum=0.7, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2, weight_decay=0.1):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.sp_serial = sp_serial
@@ -36,7 +36,7 @@ class Training():
 
         # Define optimizer AFTER device is set
         self.optimizer = optim.RMSprop(
-            self.net.parameters(), lr=lr, momentum=momentum)
+            self.net.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
         self.criterion = torch.nn.CrossEntropyLoss()
 
         self.transforms = transforms.Compose([
@@ -52,6 +52,8 @@ class Training():
             self.savepoint_dir) else []
         if not savepoints == []:
             self._loadSavepoint(savepoints)
+        else:
+            print("No savepoints found!")
 
         # TODO: Use actual dataset
         # Using CIFAR10 to test
@@ -93,9 +95,12 @@ class Training():
                     outputs = self.net(inputs)
                     loss = self.criterion(outputs, targets)
 
-                    # if math.isnan(loss.item()):
-                    #     print(loss)
-                    #     print(outputs)
+                    if math.isnan(loss.item()):
+                        print(" ############# Loss is NaN #############")
+                        print("Outputs: " + outputs)
+                        print("Loss: " + loss)
+                        exit(-1)
+
                     # Backpropagation
                     self.optimizer.zero_grad()
                     loss.backward()
