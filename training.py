@@ -14,15 +14,15 @@ import matplotlib.pyplot as plt
 # MAX_SAVEPOINTS = 10
 CLASSES = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-PRINT_AFTER_X_BATCHES = 10
+PRINT_AFTER_X_BATCHES = 50
 
 class Training():
-    def __init__(self, lr=0.00001, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2, weight_decay=0.0005):
+    def __init__(self, lr=0.0001, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2, weight_decay=0.0005):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.sp_serial = sp_serial
         # self.savepoint_dir = savepoint_dir
-        self.net = Net(classes=len(CLASSES))
+        self.net = Net(classes_number=len(CLASSES))
         if (not no_cuda) and torch.cuda.is_available():
             self.net.cuda()
             self.device = "cuda"
@@ -34,8 +34,7 @@ class Training():
         # TODO: dynamic learning rate
 
         # Define optimizer AFTER device is set
-        self.optimizer = optim.RMSprop(
-            self.net.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        self.optimizer = optim.RMSprop(self.net.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
         self.criterion = torch.nn.CrossEntropyLoss()
 
         self.transforms = transforms.Compose([
@@ -88,7 +87,7 @@ class Training():
                         inputs = inputs.cuda()
                         targets = targets.cuda()
 
-                    # run batch through net and calculate loss
+                    # Forward pass
                     outputs = self.net(inputs)
                     loss = self.criterion(outputs, targets)
 
@@ -100,7 +99,7 @@ class Training():
                         print(loss)
                         exit(-1)
 
-                    # Backpropagation
+                    # Backpropagation pass
                     self.optimizer.zero_grad()
                     loss.backward()
                     self.optimizer.step()
@@ -114,6 +113,7 @@ class Training():
                     if i % PRINT_AFTER_X_BATCHES == PRINT_AFTER_X_BATCHES-1:
                         print('[%d, %5d] loss: %.3f' %
                               (epoch + 1, i + 1, running_loss / PRINT_AFTER_X_BATCHES))
+                        # print(outputs)
                         running_loss = 0.0
                 # self._makeSavepoint()
             print("Finished training!")
