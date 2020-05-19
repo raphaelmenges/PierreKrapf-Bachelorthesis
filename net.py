@@ -14,11 +14,11 @@ class Net(nn.Module):
         self.fc3 = nn.Linear(84, classes_number)
 
     def forward(self, x):
-        x = self.pool(F.relu(self.conv1(x)))
-        x = self.pool(F.relu(self.conv2(x)))
+        x = self.pool(F.elu(self.conv1(x)))
+        x = self.pool(F.elu(self.conv2(x)))
         x = x.view(-1, 16 * 5 * 5)
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
+        x = F.elu(self.fc1(x))
+        x = F.elu(self.fc2(x))
         x = self.fc3(x)
         return x
 
@@ -127,7 +127,7 @@ class Net(nn.Module):
         x = F.elu(self.dense1(x))
         x = self.dense2(x)
         # print(x)
-        # x = F.softmax(x, dim=0)
+        # x = F.softmax(x, dim=0) # The input is expected to contain raw, unnormalized scores for each class. (CrossEntropyLoss)
 
         return x
 
