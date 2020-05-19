@@ -11,18 +11,17 @@ from net import Net
 from itertools import takewhile
 import matplotlib.pyplot as plt
 
-MAX_SAVEPOINTS = 10
+# MAX_SAVEPOINTS = 10
 CLASSES = ('plane', 'car', 'bird', 'cat',
            'deer', 'dog', 'frog', 'horse', 'ship', 'truck')
-PRINT_AFTER_X_BATCHES = 1
-
+PRINT_AFTER_X_BATCHES = 10
 
 class Training():
     def __init__(self, lr=0.00001, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2, weight_decay=0.0005):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.sp_serial = sp_serial
-        self.savepoint_dir = savepoint_dir
+        # self.savepoint_dir = savepoint_dir
         self.net = Net(classes=len(CLASSES))
         if (not no_cuda) and torch.cuda.is_available():
             self.net.cuda()
@@ -47,6 +46,7 @@ class Training():
             # TODO: ZCA whitening with: transforms.LinearTransformation()
         ])
 
+        '''
         # load savepoints if available
         savepoints = os.listdir(self.savepoint_dir) if os.path.isdir(
             self.savepoint_dir) else []
@@ -54,24 +54,19 @@ class Training():
             self._loadSavepoint(savepoints)
         else:
             print("No savepoints found!")
+        '''
 
         # TODO: Use actual dataset
-        # Using CIFAR10 to test
-        self.trainset = datasets.CIFAR10(
-            os.path.join("drive", "My Drive", "data"), train=True, download=True, transform=self.transforms)
-        self.trainloader = torch.utils.data.DataLoader(
-            self.trainset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
-
-        self.testset = datasets.CIFAR10(
-            os.path.join("drive", "My Drive", "data"), train=False, download=True, transform=self.transforms)
-        self.testloader = torch.utils.data.DataLoader(
-            self.trainset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
+        self.trainset = datasets.CIFAR10(root='./data', train=True, download=True, transform=self.transforms)
+        self.trainloader = torch.utils.data.DataLoader(self.trainset, batch_size=self.batch_size, shuffle=True, num_workers=self.num_workers)
+        self.testset = datasets.CIFAR10(root='./data', train=False, download=True, transform=self.transforms)
+        self.testloader = torch.utils.data.DataLoader(self.testset, batch_size=self.batch_size, shuffle=False, num_workers=self.num_workers)
 
     def run(self, epochs=1):
         # TODO: Save and load epochs from savepoint
         while True:
             print("Starting training!")
-            self.net.train()
+            self.net.train() # switch to train mode
             # for each epoch
             for epoch in range(epochs):
                 print(f"Epoch {epoch+1} of {epochs}:")
@@ -81,16 +76,17 @@ class Training():
                 for i, data in enumerate(self.trainloader):
                     inputs, targets = data
 
-                    if self.device == "cuda":
-                        inputs = inputs.cuda()
-                        targets = targets.cuda()
                     # Show first image for testing transforms
                     # for index, i in enumerate(inputs):
                     #     img = i.numpy()[0]
                     #     plt.imshow(img, cmap="gray")
-                    #     plt.title(CLASSES[labels[index]])
+                    #     plt.title(CLASSES[targets[index]])
                     #     plt.show()
                     # exit()
+
+                    if self.device == "cuda":
+                        inputs = inputs.cuda()
+                        targets = targets.cuda()
 
                     # run batch through net and calculate loss
                     outputs = self.net(inputs)
@@ -113,15 +109,32 @@ class Training():
                     #     print(loss)
                     #     print(outputs)
                     #     exit()
+
                     running_loss += loss.item()
                     if i % PRINT_AFTER_X_BATCHES == PRINT_AFTER_X_BATCHES-1:
                         print('[%d, %5d] loss: %.3f' %
                               (epoch + 1, i + 1, running_loss / PRINT_AFTER_X_BATCHES))
                         running_loss = 0.0
-                self._makeSavepoint()
+                # self._makeSavepoint()
             print("Finished training!")
             self.evaluate()
 
+    def evaluate(self):
+        self.net.eval()
+        correct = 0
+        total = 0
+        with torch.no_grad():
+            for data in self.testloader:
+                images, labels = data
+                outputs = self.net(images)
+                _, predicted = torch.max(outputs.data, 1)
+                total += labels.size(0)
+                correct += (predicted == labels).sum().item()
+
+        print("Accuracy of the network on %d test images: %d %%" %
+              (100 * correct / total))
+
+'''
     def _loadSavepoint(self, savepoints):
         if not os.path.isdir(self.savepoint_dir):
             return
@@ -182,18 +195,4 @@ class Training():
             print(
                 f"Removing old savepoint: {t}")
             files = files[1:]
-
-    def evaluate(self):
-        self.net.eval()
-        correct = 0
-        total = 0
-        with torch.no_grad():
-            for data in self.testloader:
-                images, labels = data
-                outputs = self.net(images)
-                _, predicted = torch.max(outputs.data, 1)
-                total += labels.size(0)
-                correct += (predicted == labels).sum().item()
-
-        print("Accuracy of the network on %d test images: %d %%" %
-              (100 * correct / total))
+'''

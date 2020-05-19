@@ -11,16 +11,13 @@ from net import Net
 from dataset import SimpleDataset
 from training import Training
 
-
 def run():
     tr = Training(savepoint_dir=os.path.join(
         "drive", "My Drive", "savepoints"))
     tr.run(epochs=10)
 
-
 def main():
     run()
-
 
 if __name__ == "__main__":
     main()
