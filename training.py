@@ -17,7 +17,7 @@ CLASSES = ('plane', 'car', 'bird', 'cat',
 PRINT_AFTER_X_BATCHES = 50
 
 class Training():
-    def __init__(self, lr=0.0001, momentum=0.9, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2, weight_decay=0.0005):
+    def __init__(self, lr=0.0001, momentum=0.0, savepoint_dir="savepoints", sp_serial=-1, no_cuda=False, batch_size=10, num_workers=2, weight_decay=0.0):
         self.batch_size = batch_size
         self.num_workers = num_workers
         self.sp_serial = sp_serial
@@ -35,6 +35,7 @@ class Training():
 
         # Define optimizer AFTER device is set
         self.optimizer = optim.RMSprop(self.net.parameters(), lr=lr, momentum=momentum, weight_decay=weight_decay)
+        # self.optimizer = optim.Adam(self.net.parameters(), lr=0.001, betas=(0.9, 0.999), eps=1e-08, weight_decay=0, amsgrad=False)
         self.criterion = torch.nn.CrossEntropyLoss()
 
         self.transforms = transforms.Compose([

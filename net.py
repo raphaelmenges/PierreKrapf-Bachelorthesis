@@ -3,6 +3,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from functools import reduce
 
+'''
 class Net(nn.Module):
     def __init__(self, classes_number):
         super(Net, self).__init__()
@@ -21,8 +22,8 @@ class Net(nn.Module):
         x = F.elu(self.fc2(x))
         x = self.fc3(x)
         return x
-
 '''
+
 class Net(nn.Module):
     def __init__(self, classes_number):
         super().__init__()
@@ -130,5 +131,3 @@ class Net(nn.Module):
         # x = F.softmax(x, dim=0) # The input is expected to contain raw, unnormalized scores for each class. (CrossEntropyLoss)
 
         return x
-
-'''
